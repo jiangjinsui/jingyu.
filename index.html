@@ -19,7 +19,6 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://unpkg.com/localforage@1.10.0/dist/localforage.min.js"></script>
     <script src="https://unpkg.com/@formkit/auto-animate@0.8.0/index.iife.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;500&display=swap" rel="stylesheet">
 
     <script>
@@ -414,7 +413,7 @@
     position: absolute; right: 0; top: -2px;
     width: 5px; height: 5px;
     background: var(--color-text);
-    border-radius: 50;
+    border-radius: 50%;
     opacity: 0.6;
     box-shadow: 0 0 8px 2px var(--color-text);
 }
@@ -482,7 +481,7 @@
             border: 1px solid var(--color-border);
             border-radius: 14px;
             padding: 10px 16px;
-            display: flex; align-items: center; gap-10px;
+            display: flex; align-items: center;
             gap: 10px;
             font-size: 12px; letter-spacing: 0.05em;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -554,6 +553,316 @@
             color: var(--color-text);
             opacity: 0.6;
         }
+        
+        /* ─── 撤回动画 · 墨散烟消 ─── */
+.msg-withdraw {
+    animation: inkDissolve 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    position: relative;
+    pointer-events: none;
+}
+.msg-withdraw::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: radial-gradient(ellipse at center, var(--color-text) 0%, transparent 70%);
+    opacity: 0;
+    animation: inkSpread 0.6s ease 0.1s forwards;
+    pointer-events: none;
+}
+@keyframes inkDissolve {
+    0%   { opacity: 1; transform: scale(1); filter: blur(0); }
+    40%  { opacity: 0.7; transform: scale(1.03); filter: blur(1px); }
+    70%  { opacity: 0.3; transform: scale(0.97) translateY(-4px); filter: blur(3px); }
+    100% { opacity: 0; transform: scale(0.9) translateY(-12px); filter: blur(8px); height: 0; margin: 0; padding: 0; overflow: hidden; }
+}
+@keyframes inkSpread {
+    0%   { opacity: 0; transform: scale(0.8); }
+    50%  { opacity: 0.06; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.4); }
+}
+
+/* 撤回提示语 */
+.withdraw-hint {
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.35em;
+    color: var(--color-muted);
+    opacity: 0;
+    animation: hintFade 2s ease 0.3s forwards;
+    padding: 8px 0;
+    font-style: italic;
+}
+@keyframes hintFade {
+    0%   { opacity: 0; transform: translateY(6px); }
+    30%  { opacity: 0.45; transform: translateY(0); }
+    80%  { opacity: 0.45; }
+    100% { opacity: 0; }
+}
+
+/* ─── 信笺气泡 ─── */
+.letter-bubble {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 16px 20px;
+    max-width: 280px;
+    position: relative;
+    font-size: 12px;
+    line-height: 2;
+    letter-spacing: 0.15em;
+    color: var(--color-text);
+}
+.letter-bubble::before {
+    content: '';
+    position: absolute;
+    top: 12px; bottom: 12px; left: 14px;
+    width: 1px;
+    background: var(--color-border);
+    opacity: 0.5;
+}
+.letter-bubble .letter-header {
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: var(--color-muted);
+    opacity: 0.5;
+    margin-bottom: 8px;
+    font-style: italic;
+}
+.letter-bubble .letter-body {
+    padding-left: 8px;
+}
+.letter-bubble .letter-body p {
+    margin: 0;
+    text-indent: 0;
+}
+.letter-bubble .letter-footer {
+    text-align: right;
+    font-size: 10px;
+    color: var(--color-muted);
+    opacity: 0.4;
+    margin-top: 10px;
+    letter-spacing: 0.2em;
+    font-style: italic;
+}
+
+/* 信件在途提示 */
+.letter-transit {
+    text-align: center;
+    padding: 12px 0;
+}
+.letter-transit-inner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--color-muted);
+    opacity: 0.6;
+}
+.letter-transit-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: var(--color-muted);
+    animation: transitPulse 2s ease infinite;
+}
+@keyframes transitPulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* ─── 寄信状态弹窗 ─── */
+.letter-status-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: var(--color-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    opacity: 0;
+    animation: lsOverlayIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    overflow: hidden;
+}
+.letter-status-overlay.fade-out {
+    animation: lsOverlayOut 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes lsOverlayIn {
+    0%   { opacity: 0; backdrop-filter: blur(0); }
+    100% { opacity: 1; backdrop-filter: blur(8px); }
+}
+@keyframes lsOverlayOut {
+    0%   { opacity: 1; transform: scale(1); }
+    60%  { opacity: 0.5; transform: scale(1.02); }
+    100% { opacity: 0; transform: scale(1.06); filter: blur(8px); }
+}
+
+/* 背景装饰圆环 */
+.ls-bg-ring {
+    position: absolute;
+    width: min(300px, 70vw); height: min(300px, 70vw);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    opacity: 0;
+    animation: lsRingIn 2s ease 0.3s forwards;
+}
+.ls-bg-ring::before {
+    content: '';
+    position: absolute; inset: -15px;
+    border: 1px dashed var(--color-border);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: ringSpin 25s linear infinite;
+}
+.ls-bg-ring::after {
+    content: '';
+    position: absolute; inset: 20px;
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: ringSpin 18s linear infinite reverse;
+}
+@keyframes lsRingIn {
+    0%   { opacity: 0; transform: scale(0.6); }
+    50%  { opacity: 0.08; transform: scale(1); }
+    100% { opacity: 0.05; transform: scale(1.05); }
+}
+
+/* 信封图标 */
+.ls-icon {
+    font-size: 2.8rem;
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    animation: lsIconIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+    filter: drop-shadow(0 4px 16px rgba(0,0,0,0.06));
+}
+.ls-icon.float {
+    animation: lsIconIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards,
+               lsIconFloat 4s ease-in-out 1s infinite;
+}
+@keyframes lsIconIn {
+    0%   { opacity: 0; transform: translateY(20px) scale(0.7); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lsIconFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    30% { transform: translateY(-10px) rotate(-4deg); }
+    60% { transform: translateY(-6px) rotate(3deg); }
+}
+/* 信封飞走 */
+.ls-icon.fly-away {
+    animation: lsIconFly 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+@keyframes lsIconFly {
+    0%   { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+    40%  { opacity: 1; transform: translateY(-30px) scale(1.1) rotate(-8deg); }
+    100% { opacity: 0; transform: translateY(-200px) scale(0.3) rotate(15deg); }
+}
+
+/* 横线装饰 */
+.ls-line {
+    width: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+    transition: width 1s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+    opacity: 0;
+    z-index: 2;
+}
+.ls-line.show {
+    opacity: 1;
+    width: min(120px, 30vw);
+}
+
+/* 状态文字 */
+.ls-text {
+    font-size: 13px;
+    letter-spacing: 0.4em;
+    color: var(--color-text);
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(10px);
+    font-weight: 300;
+    z-index: 2;
+    text-align: center;
+}
+.ls-text.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+.ls-text.hide {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* 副文字 */
+.ls-sub {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--color-muted);
+    opacity: 0;
+    transition: opacity 0.8s ease, transform 0.6s ease;
+    transform: translateY(6px);
+    z-index: 2;
+    text-align: center;
+}
+.ls-sub.show {
+    opacity: 0.45;
+    transform: translateY(0);
+}
+
+/* 进度点 */
+.ls-dots {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+    z-index: 2;
+}
+.ls-dot {
+    width: 3px; height: 3px;
+    border-radius: 50%;
+    background: var(--color-muted);
+    opacity: 0.15;
+    animation: lsDotPulse 1.8s ease infinite;
+}
+.ls-dot:nth-child(2) { animation-delay: 0.35s; }
+.ls-dot:nth-child(3) { animation-delay: 0.7s; }
+@keyframes lsDotPulse {
+    0%, 80%, 100% { opacity: 0.12; transform: scale(0.7); }
+    40% { opacity: 0.5; transform: scale(1.4); }
+}
+
+/* 底部时间戳 */
+.ls-timestamp {
+    position: absolute;
+    bottom: max(28px, 5vh);
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--color-muted);
+    opacity: 0;
+    font-family: monospace;
+    text-transform: uppercase;
+    transition: opacity 0.6s ease;
+    z-index: 2;
+}
+.ls-timestamp.show { opacity: 0.25; }
+
+/* 写信弹窗信笺纸背景 */
+.letter-paper {
+    background-image: repeating-linear-gradient(
+        transparent,
+        transparent 31px,
+        var(--color-border) 31px,
+        var(--color-border) 32px
+    );
+    background-position-y: 8px;
+}
+        
     </style>
     <style id="custom-bubble-css"></style>
 </head>
@@ -643,12 +952,7 @@
     </div>
 </div>
 
-<div id="inapp-toast" style="position:fixed;top:max(env(safe-area-inset-top,0px),16px);left:50%;transform:translateX(-50%);z-index:180;background:var(--color-surface);border:1px solid var(--color-border);border-radius:14px;padding:10px 18px;min-width:200px;max-width:80vw;box-shadow:0 4px 20px rgba(0,0,0,0.12);display:none;flex-direction:column;gap:2px;">
-    <div class="inapp-toast-body">
-        <div class="inapp-toast-name" id="toast-name" style="font-size:11px;letter-spacing:0.1em;color:var(--color-text);font-weight:500;">对方</div>
-        <div class="inapp-toast-text" id="toast-text" style="font-size:12px;color:var(--color-muted);letter-spacing:0.05em;">发来了新消息</div>
-    </div>
-</div>
+<div id="toast-stack" style="position:fixed;top:max(env(safe-area-inset-top,0px),16px);left:50%;transform:translateX(-50%);z-index:180;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;"></div>
 
 <!-- ─── PWA 安装横幅 ─── -->
 <div id="install-banner" class="install-banner" style="display:none;">
@@ -666,33 +970,57 @@
 <header class="h-16 flex items-center justify-between px-4 md:px-6 z-10 shrink-0 relative backdrop-blur-md bg-surface" style="padding-top: 6px;">
     <div class="absolute bottom-0 left-6 right-6 h-[1px] bg-border/80"></div>
 
-    <!-- 左边：对方头像 + 名字 -->
-    <div class="flex flex-col items-center justify-center gap-0 w-14">
+    <!-- 左边：对方头像 + 名字 + 心情 -->
+    <div class="flex flex-col items-center justify-center gap-0 w-14 relative">
         <div v-if="settings.showAvatar" @click="changeAvatar('them')" class="w-9 h-9 overflow-hidden bg-bg flex items-center justify-center text-muted cursor-pointer hover:scale-105 transition-transform shadow-sm" :style="{ borderRadius: settings.avatarRadius + '%' }">
             <img v-if="profiles.them.avatar" :src="profiles.them.avatar" class="w-full h-full object-cover">
             <span v-else class="text-sm font-light">{{ profiles.them.name.charAt(0) }}</span>
         </div>
         <span @click="changeName('them')" class="text-[9px] tracking-widest text-muted cursor-pointer hover:text-text transition-colors">{{ profiles.them.name }}</span>
-        <span v-show="isTyping" class="text-[8px] text-muted/60 tracking-widest h-3">输入中</span>
-        <span v-show="!isTyping" class="h-3 inline-block"></span>
+        <!-- 名字下方：打字时显示「输入中」，否则显示心情 -->
+        <span v-if="isTyping" class="h-3 inline-block text-[8px] text-muted/60 tracking-widest truncate max-w-[52px]">输入中</span>
+        <span v-else-if="themCurrentMood" class="h-3 inline-block text-[7px] text-muted/50 tracking-widest truncate max-w-[52px]" style="font-style:italic;">{{ themCurrentMood }}</span>
+        <span v-else class="h-3 inline-block"></span>
     </div>
 
     <!-- 中间：功能按钮 -->
     <div class="flex gap-2 md:gap-3 text-muted items-center">
-<button @click="toggleTheme" class="hover:text-text transition-colors"><i :data-lucide="settings.isDark ? 'sun' : 'moon'" class="w-4 h-4 stroke-[1.5]"></i></button>
+        <button @click="toggleTheme" class="hover:text-text transition-colors"><i :data-lucide="settings.isDark ? 'sun' : 'moon'" class="w-4 h-4 stroke-[1.5]"></i></button>
+        <!-- Ta说：在月亮旁边 -->
+        <button @click="modals_contactPanel = true" class="hover:text-text transition-colors text-[9px] tracking-widest leading-none" title="切换联系人">Ta说</button>
         <button @click="modals.stickerPanel = !modals.stickerPanel; modals.replyManager = false; modals.settings = false" class="hover:text-text transition-colors" :class="modals.stickerPanel ? 'text-text' : ''"><i data-lucide="image" class="w-4 h-4 stroke-[1.5]"></i></button>
+        <button @click="modals.letter = true" class="hover:text-text transition-colors" title="写信"><i data-lucide="mail" class="w-4 h-4 stroke-[1.5]"></i></button>
+        <!-- 爱心 → 打开心情语录管理 -->
+        <button @click="modals.moodManager = true" class="hover:text-text transition-colors" title="心情语录">
+            <i data-lucide="heart" class="w-4 h-4 stroke-[1.5]"></i>
+        </button>
         <button @click="modals.replyManager = true" class="hover:text-text transition-colors"><i data-lucide="library" class="w-4 h-4 stroke-[1.5]"></i></button>
-        <button @click="modals.settings = true" class="hover:text-text transition-colors"><i data-lucide="sliders-horizontal" class="w-4 h-4 stroke-[1.5]"></i></button>
+        <button @click="modals.settings = true; refreshStorageInfo()" class="hover:text-text transition-colors"><i data-lucide="sliders-horizontal" class="w-4 h-4 stroke-[1.5]"></i></button>
     </div>
 
-    <!-- 右边：我的头像 + 名字（同高占位） -->
-    <div class="flex flex-col items-center justify-center gap-0 w-14">
+    <!-- 右边：我的头像 + 名字 + 可编辑心情 -->
+    <div class="flex flex-col items-center justify-center gap-0 w-14 relative">
         <div v-if="settings.showAvatar" @click="changeAvatar('me')" class="w-9 h-9 overflow-hidden bg-bg flex items-center justify-center text-muted cursor-pointer hover:scale-105 transition-transform shadow-sm" :style="{ borderRadius: settings.avatarRadius + '%' }">
             <img v-if="profiles.me.avatar" :src="profiles.me.avatar" class="w-full h-full object-cover">
             <span v-else class="text-sm font-light">{{ profiles.me.name.charAt(0) }}</span>
         </div>
         <span @click="changeName('me')" class="text-[9px] tracking-widest text-muted cursor-pointer hover:text-text transition-colors">{{ profiles.me.name }}</span>
-        <span class="h-3"></span>
+        <!-- 我的心情：点击可编辑，点空白/回车保存 -->
+        <span v-if="!myMoodEditing && !myCurrentMood"
+              @click.stop="startEditMyMood"
+              class="h-3 inline-block text-[7px] text-muted/30 tracking-widest cursor-pointer hover:text-muted/50 transition-colors truncate max-w-[52px]">心情...</span>
+        <span v-else-if="!myMoodEditing && myCurrentMood"
+              @click.stop="startEditMyMood"
+              class="h-3 inline-block text-[7px] text-muted/60 tracking-widest cursor-pointer hover:text-text transition-colors truncate max-w-[52px]" style="font-style:italic;">{{ myCurrentMood }}</span>
+        <input v-else
+               v-model="myMoodDraft"
+               @blur="saveMyMood"
+               @keydown.enter.prevent="saveMyMood"
+               @click.stop
+               ref="myMoodInput"
+               class="h-3 text-[7px] bg-transparent border-none outline-none text-muted tracking-widest w-14 text-center"
+               maxlength="20"
+               placeholder="输入心情">
     </div>
 </header>
 
@@ -768,7 +1096,7 @@
             msg.sender === 'me' ? 'bg-bubbleSend text-text' : 'bg-surface border border-border text-text',
             'bubble-custom-class'
          ]"
-         @click="selectedMsgId = selectedMsgId === msg.id ? null : msg.id"
+         @click="!didLongPress && (selectedMsgId = selectedMsgId === msg.id ? null : msg.id)"
          @contextmenu.prevent="setQuote(msg)"
          @touchstart="onTouchStart(msg)"
          @touchend="onTouchEnd">
@@ -828,6 +1156,7 @@
         <i data-lucide="image" class="w-5 h-5 stroke-[1.5]"></i>
         <input type="file" accept="image/*" class="hidden" @change="handleImageUpload">
     </label>
+    
     <button @click="modals.multiDraft = true" class="p-2 hover:bg-border/50 rounded-xl transition-all duration-300 text-muted/80 shrink-0">
         <i data-lucide="layout-list" class="w-5 h-5 stroke-[1.5]"></i>
     </button>
@@ -988,6 +1317,83 @@
                         📖 查看详细教程
                     </button>
                 </div>
+                <!-- 存储空间 -->
+                <div class="pt-4 pb-2 border-t border-border/50 space-y-3">
+                    <span class="text-[10px] text-muted/50 tracking-widest uppercase block">本地存储</span>
+
+                    <!-- 主卡片 -->
+                    <div class="rounded-xl bg-bg/60 border border-border/40 p-4 space-y-3">
+
+                        <!-- 总量显示 -->
+                        <div class="flex items-end justify-between">
+                            <div>
+                                <span class="text-[22px] font-light tracking-tight text-text leading-none">{{ storageInfo.totalKB }}</span>
+                                <span class="text-[11px] text-muted/60 ml-1">KB</span>
+                            </div>
+                            <span class="text-[10px] text-muted/40 tracking-widest">/ {{ Math.round(storageInfo.limitKB / 1024) }} MB</span>
+                        </div>
+
+                        <!-- 分段进度条 -->
+                        <div class="flex rounded-full overflow-hidden h-2 bg-border/40" style="gap:2px;">
+                            <div v-if="storageInfo.msgKB > 0"
+                                 class="h-full rounded-full transition-all duration-700"
+                                 style="background:#7a9cc4;"
+                                 :style="{ flex: storageInfo.msgKB }"></div>
+                            <div v-if="storageInfo.repliesKB > 0"
+                                 class="h-full rounded-full transition-all duration-700"
+                                 style="background:#8fb87e;"
+                                 :style="{ flex: storageInfo.repliesKB }"></div>
+                            <div v-if="storageInfo.stickersKB > 0"
+                                 class="h-full rounded-full transition-all duration-700"
+                                 style="background:#c9a85c;"
+                                 :style="{ flex: storageInfo.stickersKB }"></div>
+                            <div v-if="storageInfo.settingsKB > 0"
+                                 class="h-full rounded-full transition-all duration-700"
+                                 style="background:#a885c2;"
+                                 :style="{ flex: storageInfo.settingsKB }"></div>
+                        </div>
+
+                        <!-- 四格图例 -->
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="flex items-center gap-2 bg-bg/80 rounded-lg px-2.5 py-1.5">
+                                <span class="w-1.5 h-5 rounded-full shrink-0" style="background:#7a9cc4;"></span>
+                                <div>
+                                    <div class="text-[9px] text-muted/50 tracking-widest leading-none mb-0.5">消息</div>
+                                    <div class="text-[11px] text-text/70 font-light">{{ storageInfo.msgKB }} KB</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 bg-bg/80 rounded-lg px-2.5 py-1.5">
+                                <span class="w-1.5 h-5 rounded-full shrink-0" style="background:#8fb87e;"></span>
+                                <div>
+                                    <div class="text-[9px] text-muted/50 tracking-widest leading-none mb-0.5">字卡</div>
+                                    <div class="text-[11px] text-text/70 font-light">{{ storageInfo.repliesKB }} KB</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 bg-bg/80 rounded-lg px-2.5 py-1.5">
+                                <span class="w-1.5 h-5 rounded-full shrink-0" style="background:#c9a85c;"></span>
+                                <div>
+                                    <div class="text-[9px] text-muted/50 tracking-widest leading-none mb-0.5">贴纸</div>
+                                    <div class="text-[11px] text-text/70 font-light">{{ storageInfo.stickersKB }} KB</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 bg-bg/80 rounded-lg px-2.5 py-1.5">
+                                <span class="w-1.5 h-5 rounded-full shrink-0" style="background:#a885c2;"></span>
+                                <div>
+                                    <div class="text-[9px] text-muted/50 tracking-widest leading-none mb-0.5">设置</div>
+                                    <div class="text-[11px] text-text/70 font-light">{{ storageInfo.settingsKB }} KB</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 警告条（>80%才显示） -->
+                        <div v-if="storageInfo.totalKB > storageInfo.limitKB * 0.8"
+                             class="flex items-center gap-2 bg-red-50 dark:bg-red-900/10 border border-red-200/50 dark:border-red-900/20 rounded-lg px-3 py-2">
+                            <i data-lucide="alert-triangle" class="w-3 h-3 text-red-400 shrink-0 stroke-[1.5]"></i>
+                            <span class="text-[10px] text-red-500/80 tracking-wide">存储空间即将用满，建议清理聊天记录</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 数据操作 -->
                 <div class="pt-6 pb-2 flex justify-end border-t border-border/50">
                     <button @click="clearChat" class="text-[11px] tracking-widest text-red-700/80 border border-red-900/10 px-4 py-1.5 hover:bg-red-900/5">清空所有</button>
@@ -1020,7 +1426,7 @@
                     <!-- 左：分组列表 -->
                     <div class="w-full md:w-1/3 border-b md:border-b-0 md:border-r border-border/50 p-3 flex flex-col gap-1.5 overflow-y-auto shrink-0 md:shrink h-[28%] md:h-full">
                         <div v-for="group in replyGroups" :key="group.id"
-                             @click="currentGroupId = group.id; selectedReplies = []"
+                             @click="currentGroupId = group.id; selectedReplies.value = []"
                              class="px-3 py-2 rounded cursor-pointer transition-all text-xs tracking-wider flex justify-between group/item"
                              :class="currentGroupId === group.id ? 'bg-bg text-text font-medium' : 'text-muted hover:bg-bg/50'">
                             <span @click.stop="openGroupEdit(group)" class="hover:underline underline-offset-2 decoration-dotted cursor-pointer">{{ group.name }} <span class="opacity-40">({{ group.replies.length }})</span></span>
@@ -1039,7 +1445,7 @@
                                     <input type="text" v-model="searchQuery" placeholder="搜索字卡..." class="w-full bg-bg/50 border border-transparent focus:border-border rounded px-8 py-1.5 text-[12px] outline-none transition-colors">
                                 </div>
                                 <!-- 多选按钮 -->
-                                <button @click="multiSelectMode = !multiSelectMode; selectedReplies = []"
+                                <button @click="multiSelectMode = !multiSelectMode; selectedReplies.value = []"
                                         class="text-[10px] tracking-widest border px-2 py-1.5 rounded transition-colors shrink-0"
                                         :class="multiSelectMode ? 'bg-text text-bg border-text' : 'border-border hover:bg-border'">多选</button>
                                 <!-- 去重按钮 -->
@@ -1121,8 +1527,6 @@
                 </div>
             </div>
         </div>
-    </transition>
-
     </transition>
 
     <!-- 分组名编辑弹窗 -->
@@ -1232,6 +1636,389 @@
             <img :src="previewImg" class="max-w-full max-h-full object-contain">
         </div>
     </transition>
+    
+    <!-- 信箱弹窗 -->
+<transition name="fade">
+    <div v-if="modals.letter" @click.self="modals.letter = false"
+         class="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex justify-center items-center px-5">
+        <div class="bg-surface w-full max-w-sm flex flex-col overflow-hidden shadow-2xl rounded-sm max-h-[85vh]"
+             style="border: 1px solid var(--color-border);">
+
+            <!-- 顶栏 + 标签切换 -->
+            <div class="px-6 pt-5 pb-0 flex justify-between items-start">
+                <div class="flex flex-col gap-1">
+                    <span class="text-[13px] tracking-[0.35em] text-text font-light">信 箱</span>
+                    <span class="text-[9px] tracking-[0.25em] text-muted/40 uppercase">MAILBOX · {{ profiles.them.name }}</span>
+                </div>
+                <button @click="modals.letter = false" class="text-muted/30 hover:text-muted transition-colors mt-0.5">
+                    <i data-lucide="x" class="w-3.5 h-3.5 stroke-[1]"></i>
+                </button>
+            </div>
+
+            <!-- 写信 / 信件 切换 -->
+            <div class="flex px-6 pt-3 pb-0 gap-4">
+                <button @click="letterTab = 'write'"
+                        class="text-[11px] tracking-[0.2em] pb-2 border-b-2 transition-all"
+                        :class="letterTab === 'write' ? 'border-text text-text' : 'border-transparent text-muted/40 hover:text-muted'">
+                    写 信
+                </button>
+                <button @click="letterTab = 'inbox'"
+                        class="text-[11px] tracking-[0.2em] pb-2 border-b-2 transition-all relative"
+                        :class="letterTab === 'inbox' ? 'border-text text-text' : 'border-transparent text-muted/40 hover:text-muted'">
+                    往来信件
+                    <span v-if="letterHistory.length > 0" class="ml-1 text-[9px] text-muted/30">({{ letterHistory.length }})</span>
+                </button>
+            </div>
+
+            <div class="mx-6 h-[1px] bg-border/60"></div>
+
+            <!-- 写信面板 -->
+            <template v-if="letterTab === 'write'">
+                <div class="px-6 py-4 flex-1 overflow-y-auto">
+                    <div class="text-[10px] text-muted/40 tracking-[0.2em] mb-2 italic">致 {{ profiles.them.name }}：</div>
+                    <textarea v-model="letterText" rows="8"
+                        class="w-full bg-transparent text-[13px] resize-none outline-none leading-[2] tracking-wide placeholder-muted/20 border-none font-light letter-paper"
+                        placeholder="见字如面...&#10;&#10;落笔写下想对TA说的话"></textarea>
+                </div>
+
+                <div class="mx-6 h-[1px] bg-border/60"></div>
+
+                <!-- 在途状态 + 寄出 -->
+                <div class="px-6 py-4 flex justify-between items-center shrink-0">
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[9px] tracking-[0.2em] text-muted/30 uppercase">预计送达</span>
+                        <span class="text-[11px] tracking-[0.15em] text-muted/50">1 ~ 6 小时后</span>
+                        <span v-if="pendingLetters.length > 0" class="text-[9px] tracking-[0.15em] text-muted/30 mt-1 flex items-center gap-1">
+                            <span class="letter-transit-dot" style="width:3px;height:3px;"></span>
+                            {{ pendingLetters.length }}封信件在途中
+                        </span>
+                    </div>
+                    <button @click="sendLetter"
+                            class="text-[11px] tracking-[0.3em] transition-all px-5 py-2 border uppercase flex items-center gap-2"
+                            :class="letterText.trim()
+                                ? 'text-text border-text/30 hover:bg-text hover:text-bg'
+                                : 'text-muted/20 border-border/30 pointer-events-none'">
+                        <span>寄 出</span>
+                        <span style="font-size:14px;">✉</span>
+                    </button>
+                </div>
+            </template>
+
+            <!-- 信件历史面板 -->
+            <template v-if="letterTab === 'inbox'">
+                <div class="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+
+                    <!-- 在途信件 -->
+                    <div v-for="pl in pendingLetters" :key="pl.id" class="letter-transit">
+                        <div class="letter-transit-inner">
+                            <div class="letter-transit-dot"></div>
+                            <span>回信途中 · 约 {{ pl.remainText }}</span>
+                        </div>
+                    </div>
+
+                    <!-- 已完成的信件 -->
+                    <div v-if="letterHistory.length === 0 && pendingLetters.length === 0"
+                         class="flex flex-col items-center justify-center py-12 text-muted/30 text-[10px] tracking-[0.25em] gap-2">
+                        <i data-lucide="mail" class="w-5 h-5 stroke-[1]"></i>
+                        <span>尚无信件往来</span>
+                    </div>
+
+                    <div v-for="(pair, idx) in letterHistory" :key="idx"
+                         class="border border-border/40 rounded-sm overflow-hidden">
+
+                        <!-- 我寄出的信 -->
+                        <div class="px-4 py-3 bg-bg/30">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[9px] tracking-[0.25em] text-muted/40 uppercase">我的信</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] tracking-[0.15em] text-muted/30">{{ pair.sentTime }}</span>
+                                    <button @click="deleteLetter(idx)"
+                                        class="text-muted/20 hover:text-red-400 transition-colors"
+                                        title="删除这封信">
+                                        <i data-lucide="trash-2" class="w-3 h-3 stroke-[1.5]"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-[12px] leading-[1.9] tracking-wide text-text/80 font-light">
+                                <p v-for="(line, li) in pair.sentContent.split('\n')" :key="li" class="m-0">{{ line }}</p>
+                            </div>
+                            <div class="text-right text-[10px] text-muted/30 italic mt-2 tracking-[0.15em]">{{ profiles.me.name }} 落笔</div>
+                        </div>
+
+                        <!-- 分隔 -->
+                        <div class="h-[1px] bg-border/40"></div>
+
+                        <!-- 对方的回信 -->
+                        <div class="px-4 py-3">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-[9px] tracking-[0.25em] text-muted/40 uppercase">{{ profiles.them.name }} 的回信</span>
+                                <span class="text-[9px] tracking-[0.15em] text-muted/30">{{ pair.replyTime }}</span>
+                            </div>
+                            <div class="text-[12px] leading-[1.9] tracking-wide text-text/80 font-light">
+                                <p v-for="(line, li) in pair.replyContent.split('\n')" :key="li" class="m-0">{{ line }}</p>
+                            </div>
+                            <div class="text-right text-[10px] text-muted/30 italic mt-2 tracking-[0.15em]">{{ profiles.them.name }} 亲启</div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+
+        </div>
+    </div>
+</transition>
+
+<!-- 信件在途提示（3秒自动消失） -->
+<transition name="fade">
+    <div v-if="showLetterToast" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-30">
+        <div class="letter-transit">
+            <div class="letter-transit-inner">
+                <div class="letter-transit-dot"></div>
+                <span>信件途中 · {{ pendingLetters.length }}封</span>
+                <span style="font-size:12px;">✉</span>
+            </div>
+        </div>
+    </div>
+</transition>
+    
+    <!-- 删除信件确认弹窗 -->
+<transition name="fade">
+    <div v-if="modals.confirmDeleteLetter" @click.self="cancelDeleteLetter"
+         class="fixed inset-0 bg-black/30 backdrop-blur-sm z-[100] flex items-center justify-center px-8">
+        <div class="bg-surface w-full max-w-[280px] rounded-sm shadow-2xl overflow-hidden"
+             style="border: 1px solid var(--color-border);">
+            <!-- 顶部装饰线 -->
+            <div class="h-[1px] w-full" style="background: linear-gradient(90deg, transparent, var(--color-muted), transparent); opacity: 0.3;"></div>
+            <div class="px-7 py-6 flex flex-col items-center gap-4">
+                <!-- 图标 -->
+                <div class="w-8 h-8 flex items-center justify-center opacity-30">
+                    <i data-lucide="trash-2" class="w-5 h-5 stroke-[1]"></i>
+                </div>
+                <!-- 文字 -->
+                <div class="text-center flex flex-col gap-1.5">
+                    <p class="text-[12px] tracking-[0.2em] text-text font-light">焚毁这封信件？</p>
+                    <p class="text-[10px] tracking-[0.15em] text-muted/50 italic">往来文字将化为尘烟，无法复原</p>
+                </div>
+                <!-- 按钮组 -->
+                <div class="w-full flex flex-col gap-2 mt-1">
+                    <button @click="confirmDeleteLetter"
+                        class="w-full py-2 text-[11px] tracking-[0.25em] border border-border/60 text-muted/60 hover:border-muted/40 hover:text-text transition-all rounded-sm">
+                        付之一炬
+                    </button>
+                    <button @click="cancelDeleteLetter"
+                        class="w-full py-2 text-[11px] tracking-[0.25em] text-muted/30 hover:text-muted transition-colors">
+                        留存此信
+                    </button>
+                </div>
+            </div>
+            <div class="h-[1px] w-full" style="background: linear-gradient(90deg, transparent, var(--color-muted), transparent); opacity: 0.15;"></div>
+        </div>
+    </div>
+</transition>
+
+<!-- ── Ta说：联系人全屏页面 ── -->
+<transition name="fade">
+    <div v-if="modals_contactPanel"
+         class="fixed inset-0 bg-bg z-[110] flex flex-col overflow-hidden">
+
+        <!-- 顶栏 -->
+        <div class="h-14 flex items-center justify-between px-5 shrink-0 relative bg-surface"
+             style="padding-top: env(safe-area-inset-top, 0px);">
+            <button @click="modals_contactPanel = false" class="text-muted hover:text-text transition-colors flex items-center gap-1.5">
+                <i data-lucide="arrow-left" class="w-4 h-4 stroke-[1.5]"></i>
+                <span class="text-[11px] tracking-widest">返回</span>
+            </button>
+            <div class="flex flex-col items-center">
+                <span class="text-[13px] tracking-[0.3em] text-text font-light">Ta 说</span>
+                <span class="text-[8px] tracking-[0.25em] text-muted/40 uppercase">SWITCH · CONTACT</span>
+            </div>
+            <div class="w-16"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-[1px] bg-border/60"></div>
+        </div>
+
+        <!-- 内容区 -->
+        <div class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-5">
+
+            <!-- 当前对话 -->
+            <div>
+                <div class="text-[9px] text-muted/40 tracking-[0.3em] uppercase mb-3">当前对话</div>
+                <div class="flex items-center gap-4 bg-surface rounded-2xl p-4 border border-border/40">
+                    <div class="w-12 h-12 overflow-hidden bg-bg flex items-center justify-center text-muted shrink-0 shadow-sm" :style="{ borderRadius: settings.avatarRadius + '%' }">
+                        <img v-if="profiles.them.avatar" :src="profiles.them.avatar" class="w-full h-full object-cover">
+                        <span v-else class="text-lg font-light">{{ profiles.them.name.charAt(0) }}</span>
+                    </div>
+                    <div class="flex flex-col gap-0.5 flex-1 min-w-0">
+                        <span class="text-[13px] tracking-wider text-text font-light">{{ profiles.them.name }}</span>
+                        <span v-if="themCurrentMood" class="text-[10px] text-muted/50 italic tracking-wide truncate">{{ themCurrentMood }}</span>
+                        <span v-else class="text-[10px] text-muted/30 tracking-widest">无心情</span>
+                    </div>
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <div class="w-2 h-2 rounded-full bg-text/20"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系人列表 -->
+            <div>
+                <div class="text-[9px] text-muted/40 tracking-[0.3em] uppercase mb-3">联系人</div>
+                <div v-if="contactList.length === 0"
+                     class="flex flex-col items-center justify-center py-10 text-muted/25 text-[10px] tracking-widest gap-2">
+                    <i data-lucide="users" class="w-5 h-5 stroke-[1]"></i>
+                    <span>尚无联系人</span>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <div v-for="c in contactList" :key="c.id"
+                         class="flex items-center gap-4 bg-surface rounded-2xl p-4 border border-border/30 cursor-pointer hover:border-border/60 active:scale-[0.98] transition-all group/contact"
+                         @click="switchContact(c)">
+                        <!-- 头像（可点击换图） -->
+                        <div class="relative shrink-0" @click.stop>
+                            <div class="w-11 h-11 overflow-hidden bg-bg flex items-center justify-center text-muted shadow-sm cursor-pointer"
+                                 :style="{ borderRadius: settings.avatarRadius + '%' }"
+                                 @click="pickContactAvatar(c)">
+                                <img v-if="c.avatar" :src="c.avatar" class="w-full h-full object-cover">
+                                <span v-else class="text-base font-light">{{ c.name.charAt(0) }}</span>
+                            </div>
+                            <div class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-surface border border-border/40 rounded-full flex items-center justify-center pointer-events-none">
+                                <i data-lucide="camera" class="w-2 h-2 text-muted/40 stroke-[1.5]"></i>
+                            </div>
+                        </div>
+                        <!-- 信息 -->
+                        <div class="flex flex-col gap-1 flex-1 min-w-0" @click.stop>
+                            <!-- 名字可编辑 -->
+                            <input :value="c.name" maxlength="12"
+                                   @change="e => { c.name = e.target.value.trim().substring(0,12); saveContactList(); }"
+                                   @click.stop
+                                   class="bg-transparent text-[13px] tracking-wider text-text outline-none border-none w-full font-light"
+                                   placeholder="联系人名字">
+                            <!-- 心情可编辑 -->
+                            <input :value="c.mood || ''" maxlength="30"
+                                   @change="e => { c.mood = e.target.value.trim(); saveContactList(); }"
+                                   @click.stop
+                                   class="bg-transparent text-[10px] text-muted/50 italic tracking-wide outline-none border-none w-full"
+                                   placeholder="心情...">
+                            <!-- 我的名字 -->
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="text-[8px] text-muted/25 tracking-widest shrink-0">我叫</span>
+                                <input :value="c.myName || ''" maxlength="12"
+                                       @change="e => { c.myName = e.target.value.trim().substring(0,12); saveContactList(); }"
+                                       @click.stop
+                                       class="bg-transparent text-[10px] text-muted/40 tracking-wide outline-none border-none flex-1"
+                                       placeholder="我的名字（可选）">
+                            </div>
+                        </div>
+                        <!-- 切换 + 删除 -->
+                        <div class="flex flex-col items-end gap-2 shrink-0">
+                            <button @click.stop="removeContact(c.id)" class="text-muted/15 hover:text-red-400 transition-colors p-1">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5 stroke-[1.5]"></i>
+                            </button>
+                            <button @click="switchContact(c)"
+                                    class="text-[9px] tracking-widest text-muted/40 hover:text-text border border-border/40 hover:border-border px-2 py-0.5 rounded-lg transition-all">
+                                切换
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 添加新联系人 -->
+            <div>
+                <div class="text-[9px] text-muted/40 tracking-[0.3em] uppercase mb-3">添加联系人</div>
+                <div class="bg-surface rounded-2xl p-4 border border-border/30 flex flex-col gap-3">
+                    <div class="flex gap-3 items-center">
+                        <!-- 新头像预览 -->
+                        <div class="w-11 h-11 overflow-hidden bg-bg flex items-center justify-center text-muted/30 shrink-0 border border-dashed border-border/60 cursor-pointer"
+                             :style="{ borderRadius: settings.avatarRadius + '%' }"
+                             @click="pickNewContactAvatar">
+                            <img v-if="newContactAvatar" :src="newContactAvatar" class="w-full h-full object-cover">
+                            <i v-else data-lucide="plus" class="w-4 h-4 stroke-[1]"></i>
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <input v-model="newContactName" @keydown.enter="addContact" type="text" maxlength="12"
+                                   placeholder="对方名字..."
+                                   class="bg-bg border border-border/60 rounded-xl px-3 py-1.5 text-[12px] outline-none tracking-wider w-full">
+                            <input v-model="newContactMyName" type="text" maxlength="12"
+                                   placeholder="我的名字（在这段对话里叫什么）"
+                                   class="bg-bg border border-border/60 rounded-xl px-3 py-1.5 text-[11px] outline-none tracking-wider w-full text-muted">
+                        </div>
+                    </div>
+                    <button @click="addContact"
+                            class="w-full text-[11px] tracking-[0.25em] border border-text/20 text-text py-2.5 rounded-xl hover:bg-text hover:text-bg transition-all">
+                        添 加
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</transition>
+
+<!-- ── 心情语录管理弹窗 ── -->
+<transition name="fade">
+    <div v-if="modals.moodManager" @click.self="modals.moodManager = false"
+         class="fixed inset-0 bg-black/25 backdrop-blur-sm z-[100] flex items-end justify-center">
+        <div class="bg-surface w-full max-w-md rounded-t-2xl shadow-2xl flex flex-col overflow-hidden"
+             style="border: 1px solid var(--color-border); border-bottom: none; max-height: 75vh;">
+
+            <!-- 把手 -->
+            <div class="flex justify-center pt-3 pb-1 shrink-0">
+                <div class="w-8 h-1 rounded-full bg-border/60"></div>
+            </div>
+
+            <!-- 顶栏 -->
+            <div class="px-5 pt-1 pb-3 flex justify-between items-center shrink-0">
+                <div class="flex flex-col gap-0.5">
+                    <span class="text-[13px] tracking-[0.3em] text-text font-light">心情语录</span>
+                    <span class="text-[8px] tracking-[0.25em] text-muted/40 uppercase">TA'S · MOOD</span>
+                </div>
+                <button @click="modals.moodManager = false" class="text-muted/30 hover:text-muted transition-colors">
+                    <i data-lucide="x" class="w-4 h-4 stroke-[1]"></i>
+                </button>
+            </div>
+
+            <div class="h-[1px] mx-5 bg-border/50 shrink-0"></div>
+
+            <!-- 当前心情 -->
+            <div v-if="themCurrentMood" class="mx-5 my-3 px-4 py-2.5 bg-bg border border-border/40 rounded-xl flex items-center justify-between shrink-0">
+                <span class="text-[11px] text-muted/70 italic tracking-wide flex-1 mr-2">{{ themCurrentMood }}</span>
+                <button @click="pickRandomMood(); saveMoodData()"
+                        class="text-[9px] text-muted/30 hover:text-muted tracking-widest transition-colors shrink-0">换一个</button>
+            </div>
+            <div v-else class="mx-5 my-3 px-4 py-2.5 bg-bg/50 border border-dashed border-border/30 rounded-xl shrink-0">
+                <span class="text-[10px] text-muted/25 tracking-widest">还没有心情语录，在下方添加～</span>
+            </div>
+
+            <!-- 语录列表 -->
+            <div class="flex-1 overflow-y-auto px-5 pb-2 flex flex-col gap-1.5">
+                <div v-for="(mood, mi) in themMoodList" :key="mi"
+                     class="flex items-center gap-3 group/mood py-1.5 px-3 rounded-xl hover:bg-bg/60 transition-colors cursor-pointer"
+                     @click="themCurrentMood = mood; saveMoodData()">
+                    <span class="flex-1 text-[11px] text-text/70 tracking-wide leading-relaxed">{{ mood }}</span>
+                    <div class="flex items-center gap-1 opacity-0 group-hover/mood:opacity-100 transition-opacity">
+                        <span class="text-[8px] text-muted/30 tracking-widest">点击使用</span>
+                        <button @click.stop="themMoodList.splice(mi,1); if(themCurrentMood===mood) pickRandomMood(); saveMoodData()"
+                                class="text-muted/20 hover:text-red-400 transition-colors p-0.5">
+                            <i data-lucide="x" class="w-3 h-3 stroke-[1.5]"></i>
+                        </button>
+                    </div>
+                </div>
+                <div v-if="themMoodList.length === 0" class="text-center text-[10px] text-muted/20 tracking-widest py-4">暂无语录</div>
+            </div>
+
+            <div class="h-[1px] mx-5 bg-border/40 shrink-0"></div>
+
+            <!-- 添加输入框（响应式变量，不用 getElementById） -->
+            <div class="px-5 py-3 flex gap-2 shrink-0" style="padding-bottom: max(env(safe-area-inset-bottom, 12px), 14px);">
+                <input v-model="newMoodText"
+                       @keydown.enter="addMood"
+                       type="text" maxlength="30"
+                       placeholder="添加心情语录..."
+                       class="flex-1 bg-bg border border-border rounded-xl px-4 py-2 text-[12px] outline-none tracking-wider">
+                <button @click="addMood"
+                        class="px-4 bg-text text-bg text-[11px] tracking-widest rounded-xl hover:opacity-80 transition-opacity shrink-0">加</button>
+            </div>
+        </div>
+    </div>
+</transition>
+
     <!-- 多条草稿弹窗 -->
 <transition name="fade">
     <div v-if="modals.multiDraft" @click.self="modals.multiDraft = false"
@@ -1317,14 +2104,70 @@
 
 // ─── Service Worker ───
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-        .then(reg => {
-            console.log('SW 注册成功');
-        })
-        .catch(err => {
-            console.log('SW 注册失败', err);
-        });
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
+
+// ─── 后台保活（多重策略 · 增强版）───
+(function() {
+    // ── 策略1：两个 Worker 互相交替 ping，防止单线程被冻结 ──
+    const makeWorker = (intervalMs) => {
+        const code = `
+let t = setInterval(() => self.postMessage('ping'), ${intervalMs});
+self.onmessage = e => { if(e.data === 'stop') clearInterval(t); };
+        `;
+        return new Worker(URL.createObjectURL(new Blob([code], { type: 'application/javascript' })));
+    };
+    const w1 = makeWorker(4000);
+    const w2 = makeWorker(7000);
+
+    let lastPingTime = Date.now();
+
+    const onPing = () => {
+        lastPingTime = Date.now();
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'keepalive' });
+        }
+    };
+    w1.onmessage = onPing;
+    w2.onmessage = onPing;
+
+    // ── 策略2：Screen Wake Lock API ──
+    let wakeLock = null;
+    const requestWakeLock = async () => {
+        if (!('wakeLock' in navigator)) return;
+        try { wakeLock = await navigator.wakeLock.request('screen'); } catch(e) {}
+    };
+    requestWakeLock();
+
+    // ── 策略3：visibilitychange 检测冻结 + 重激活 ──
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            requestWakeLock();
+            w1.postMessage('ping');
+            w2.postMessage('ping');
+            const gap = Date.now() - lastPingTime;
+            if (gap > 45000) {
+                // 被冻结超过45s，通知 Vue app 重建定时器
+                window.dispatchEvent(new CustomEvent('jingyu-wakeup', { detail: { gap } }));
+            }
+        }
+    });
+
+    // ── 策略4：监听 SW 的后台计时触发，转发给 Vue app ──
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', e => {
+            if (e.data && e.data.type === 'SW_FIRE') {
+                window.dispatchEvent(new CustomEvent('jingyu-sw-fire', { detail: e.data }));
+            }
+        });
+    }
+
+    window.addEventListener('beforeunload', () => {
+        w1.postMessage('stop');
+        w2.postMessage('stop');
+        if (wakeLock) wakeLock.release();
+    });
+})();
 </script>
 
 <script>
@@ -1347,10 +2190,431 @@ createApp({
         const draftText = ref('');
 const draftLines = computed(() => draftText.value.split('\n').map(l => l.trim()).filter(l => l));
 
+// ── 回信功能 ──
+const letterText = ref('');
+const letterTab = ref('write');
+const letterHistory = ref([]);
+const showLetterToast = ref(false);
+const pendingLetters = ref([]);
+
+// 从 localforage 恢复待送达的信件
+(async () => {
+    try {
+        const saved = await localforage.getItem('jingyu_pending_letters');
+        if (saved && Array.isArray(saved)) {
+            pendingLetters.value = saved;
+        }
+        const hist = await localforage.getItem('jingyu_letter_history');
+        if (hist && Array.isArray(hist)) {
+            letterHistory.value = hist;
+        }
+    } catch(e) {}
+})();
+
+const savePendingLetters = async () => {
+    await localforage.setItem('jingyu_pending_letters', JSON.parse(JSON.stringify(pendingLetters.value)));
+};
+
+const saveLetterHistory = async () => {
+    await localforage.setItem('jingyu_letter_history', JSON.parse(JSON.stringify(letterHistory.value)));
+};
+
+const deleteLetter = (idx) => {
+    pendingDeleteIdx.value = idx;
+    modals.confirmDeleteLetter = true;
+};
+const confirmDeleteLetter = () => {
+    if (pendingDeleteIdx.value !== null) {
+        letterHistory.value.splice(pendingDeleteIdx.value, 1);
+        saveLetterHistory();
+        pendingDeleteIdx.value = null;
+    }
+    modals.confirmDeleteLetter = false;
+};
+const cancelDeleteLetter = () => {
+    pendingDeleteIdx.value = null;
+    modals.confirmDeleteLetter = false;
+};
+
+// 计算剩余时间文本
+const updateLetterRemainText = () => {
+    const now = Date.now();
+    pendingLetters.value.forEach(pl => {
+        const remain = Math.max(0, pl.deliverAt - now);
+        if (remain <= 0) {
+            pl.remainText = '即将送达';
+        } else {
+            const h = Math.floor(remain / 3600000);
+            const m = Math.floor((remain % 3600000) / 60000);
+            if (h > 0) pl.remainText = `${h}小时${m}分`;
+            else pl.remainText = `${m}分钟`;
+        }
+    });
+};
+
+const sendLetter = () => {
+    if (!letterText.value.trim()) return;
+    const content = letterText.value.trim();
+    letterText.value = '';
+
+ // 寄信状态弹窗动画
+const overlay = document.createElement('div');
+overlay.className = 'letter-status-overlay';
+overlay.innerHTML = `
+    <div class="ls-bg-ring"></div>
+    <div class="ls-icon" id="ls-icon">✉️</div>
+    <div class="ls-line"></div>
+    <div class="ls-text" id="ls-text"></div>
+    <div class="ls-dots"><div class="ls-dot"></div><div class="ls-dot"></div><div class="ls-dot"></div></div>
+    <div class="ls-sub" id="ls-sub"></div>
+    <div class="ls-timestamp" id="ls-ts"></div>
+`;
+document.body.appendChild(overlay);
+
+const lsIcon = overlay.querySelector('#ls-icon');
+const lsText = overlay.querySelector('#ls-text');
+const lsSub = overlay.querySelector('#ls-sub');
+const lsLine = overlay.querySelector('.ls-line');
+const lsTs = overlay.querySelector('#ls-ts');
+
+// 第一步：信件正在封装
+setTimeout(() => {
+    lsLine.classList.add('show');
+    lsText.textContent = '信件正在封装...';
+    lsText.classList.add('show');
+    lsIcon.classList.add('float');
+}, 400);
+
+// 第二步：信件已寄出
+setTimeout(() => { lsText.classList.remove('show'); lsText.classList.add('hide'); }, 2200);
+setTimeout(() => {
+    lsText.classList.remove('hide');
+    lsText.textContent = '信件已寄出';
+    lsText.classList.add('show');
+    lsIcon.classList.add('fly-away');
+}, 2800);
+
+// 第三步：等待回信
+setTimeout(() => { lsText.classList.remove('show'); lsText.classList.add('hide'); }, 4500);
+setTimeout(() => {
+    lsText.classList.remove('hide');
+    lsText.textContent = '等待对方回信...';
+    lsText.classList.add('show');
+    lsSub.textContent = '信件正在途中，请耐心等待';
+    lsSub.classList.add('show');
+    lsTs.textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false }) + ' 寄出';
+    lsTs.classList.add('show');
+}, 5100);
+
+// 淡出
+setTimeout(() => {
+    overlay.classList.add('fade-out');
+    setTimeout(() => overlay.remove(), 1300);
+}, 7200);
+
+    // 随机延迟 1~6 小时（毫秒）
+    const delayMs = (Math.random() * 5 + 1) * 3600 * 1000;
+    const deliverAt = Date.now() + delayMs;
+    const letterId = 'letter_' + Date.now();
+
+    // 从字卡里挑 5~6 句组成回信
+    const allText = replyGroups.value.flatMap(g => g.replies).filter(r => !r.type || r.type === 'text');
+    const pickCount = Math.floor(Math.random() * 2) + 5;
+    let replyLines = [];
+    if (allText.length > 0) {
+        const shuffled = [...allText].sort(() => Math.random() - 0.5);
+        replyLines = shuffled.slice(0, Math.min(pickCount, shuffled.length)).map(r => r.text);
+    } else {
+        replyLines = ['......'];
+    }
+
+    const pending = {
+        id: letterId,
+        deliverAt: deliverAt,
+        replyContent: replyLines.join('\n'),
+        sentContent: content,
+        sentTime: new Date().toLocaleString('zh-CN'),
+        remainText: ''
+    };
+
+    pendingLetters.value.push(pending);
+    updateLetterRemainText();
+    savePendingLetters();
+
+    // 3秒 toast 提示
+    showLetterToast.value = true;
+    setTimeout(() => { showLetterToast.value = false; }, 3000);
+
+    // 设置定时器
+    scheduleLetterDelivery(pending);
+
+    // 切换到信件列表查看
+    letterTab.value = 'inbox';
+};
+
+// 送达回信
+const deliverLetter = (pending) => {
+    // 存入历史
+    letterHistory.value.unshift({
+        id: pending.id,
+        sentContent: pending.sentContent,
+        sentTime: pending.sentTime,
+        replyContent: pending.replyContent,
+        replyTime: new Date().toLocaleString('zh-CN')
+    });
+    saveLetterHistory();
+
+    playSound('them');
+    sendSystemNotif(profiles.them.name, '✉ 你收到了一封回信');
+
+    // 3秒 toast
+    showLetterToast.value = true;
+    setTimeout(() => { showLetterToast.value = false; }, 3000);
+
+    // 从待送达列表中移除
+    pendingLetters.value = pendingLetters.value.filter(p => p.id !== pending.id);
+    savePendingLetters();
+};
+
+// 用 SW 委托计时（页面关闭/切走后依然能触发），Worker 作备份
+const scheduleLetterDelivery = (pending) => {
+    const remain = Math.max(0, pending.deliverAt - Date.now());
+    if (remain <= 0) {
+        deliverLetter(pending);
+        return;
+    }
+
+    // 优先委托给 SW
+    const swReady = navigator.serviceWorker && navigator.serviceWorker.controller;
+    if (swReady) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SCHEDULE',
+            id: 'letter_' + pending.id,
+            fireAt: pending.deliverAt,
+            notifTitle: '静语',
+            notifBody: `✉ 你收到了一封来自 ${profiles.them.name} 的回信`,
+            clientEvent: 'deliver_letter'
+        });
+        // SW 触发时通过 jingyu-sw-fire 事件回调
+    }
+
+    // 同时用 Worker 计时作备份（页面在前台时更可靠）
+    const code = `setTimeout(() => self.postMessage('deliver'), ${remain})`;
+    const w = new Worker(URL.createObjectURL(new Blob([code])));
+    w.onmessage = () => {
+        w.terminate();
+        // 取消 SW 的备份
+        if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({ type: 'UNSCHEDULE', id: 'letter_' + pending.id });
+        }
+        deliverLetter(pending);
+    };
+};
+
+// 监听 SW 后台触发的信件送达
+window.addEventListener('jingyu-sw-fire', (e) => {
+    const { id, clientEvent } = e.detail || {};
+    if (clientEvent === 'deliver_letter') {
+        const letterId = id.replace('letter_', '');
+        const pending = pendingLetters.value.find(p => p.id === letterId);
+        if (pending) deliverLetter(pending);
+    }
+    if (clientEvent === 'active_msg_tick') {
+        triggerAutoReply();
+        // 重新注册下一次
+        if (window._scheduleSWActiveTick) window._scheduleSWActiveTick();
+    }
+});
+
+// 每分钟更新倒计时文本
+setInterval(() => {
+    updateLetterRemainText();
+}, 60000);
+
         const profiles = reactive({
             me: { name: '我', avatar: '' },
             them: { name: '对方', avatar: '' }
         });
+
+        // ── 心情功能 ──
+        // 每个 profile 有一个 mood 字段
+        // themMoods: 自定义心情语录池（随机切换）
+        // moodVisible: 控制对方头像下方心情气泡显示
+        const moodVisible = ref(false);
+        const themCurrentMood = ref('');
+        const myCurrentMood = ref('');
+        const themMoodList = ref([]); // 自定义对方心情语录
+        let moodTimer = null;
+
+        const pickRandomMood = () => {
+            if (themMoodList.value.length === 0) return;
+            const pool = themMoodList.value;
+            themCurrentMood.value = pool[Math.floor(Math.random() * pool.length)];
+        };
+
+        const scheduleMoodChange = () => {
+            if (moodTimer) clearTimeout(moodTimer);
+            // 0.5~8h 随机
+            const delay = (0.5 + Math.random() * 7.5) * 3600 * 1000;
+            moodTimer = setTimeout(() => {
+                pickRandomMood();
+                scheduleMoodChange();
+            }, delay);
+        };
+
+        // 我的心情：点空白处自动保存（通过 contenteditable 失焦）
+        const myMoodEditing = ref(false);
+        const myMoodDraft = ref('');
+        const myMoodInput = ref(null);
+        const newMoodText = ref('');
+
+        const addMood = () => {
+            const v = newMoodText.value.trim();
+            if (!v) return;
+            themMoodList.value.push(v);
+            if (!themCurrentMood.value) themCurrentMood.value = v;
+            newMoodText.value = '';
+            saveMoodData();
+        };
+
+        const startEditMyMood = () => {
+            myMoodDraft.value = myCurrentMood.value;
+            myMoodEditing.value = true;
+            nextTick(() => { if (myMoodInput.value) myMoodInput.value.focus(); });
+        };
+        const saveMyMood = () => {
+            if (myMoodDraft.value.trim() !== undefined) {
+                myCurrentMood.value = myMoodDraft.value.trim();
+            }
+            myMoodEditing.value = false;
+            saveMoodData();
+        };
+
+        const saveMoodData = async () => {
+            await localforage.setItem('jingyu_mood', {
+                themCurrentMood: themCurrentMood.value,
+                myCurrentMood: myCurrentMood.value,
+                themMoodList: JSON.parse(JSON.stringify(themMoodList.value))
+            });
+        };
+
+        // ── 联系人切换（Ta说）──
+        const contactList = ref([]); // [{id, name, avatar, mood, myName, myAvatar}]
+        const modals_contactPanel = ref(false);
+        const newContactName = ref('');
+        const newContactMyName = ref('');
+        const newContactAvatar = ref('');
+
+        // 切换联系人：同时刷新我和对方的 profile
+        const switchContact = (contact) => {
+            profiles.them.name = contact.name;
+            profiles.them.avatar = contact.avatar || '';
+            themCurrentMood.value = contact.mood || '';
+            if (contact.myName) profiles.me.name = contact.myName;
+            if (contact.myAvatar) profiles.me.avatar = contact.myAvatar;
+            modals_contactPanel.value = false;
+            saveData();
+            saveMoodData();
+        };
+
+        // 给已有联系人选头像
+        const pickContactAvatar = (contact) => {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = 'image/*';
+            input.onchange = e => {
+                const f = e.target.files[0];
+                if (!f) return;
+                const r = new FileReader();
+                r.onload = ev => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const c = document.createElement('canvas'), MAX = 200;
+                        const ratio = img.width / img.height;
+                        c.width = ratio >= 1 ? MAX : MAX * ratio;
+                        c.height = ratio >= 1 ? MAX / ratio : MAX;
+                        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                        contact.avatar = c.toDataURL('image/jpeg', 0.85);
+                        saveContactList();
+                    };
+                    img.src = ev.target.result;
+                };
+                r.readAsDataURL(f);
+            };
+            input.click();
+        };
+
+        // 给新联系人选头像
+        const pickNewContactAvatar = () => {
+            const input = document.createElement('input');
+            input.type = 'file'; input.accept = 'image/*';
+            input.onchange = e => {
+                const f = e.target.files[0];
+                if (!f) return;
+                const r = new FileReader();
+                r.onload = ev => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const c = document.createElement('canvas'), MAX = 200;
+                        const ratio = img.width / img.height;
+                        c.width = ratio >= 1 ? MAX : MAX * ratio;
+                        c.height = ratio >= 1 ? MAX / ratio : MAX;
+                        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+                        newContactAvatar.value = c.toDataURL('image/jpeg', 0.85);
+                    };
+                    img.src = ev.target.result;
+                };
+                r.readAsDataURL(f);
+            };
+            input.click();
+        };
+
+        const addContact = () => {
+            if (!newContactName.value.trim()) return;
+            const newC = {
+                id: 'c_' + Date.now(),
+                name: newContactName.value.trim().substring(0, 12),
+                avatar: newContactAvatar.value || '',
+                mood: '',
+                myName: newContactMyName.value.trim().substring(0, 12) || '',
+                myAvatar: ''
+            };
+            contactList.value.push(newC);
+            newContactName.value = '';
+            newContactMyName.value = '';
+            newContactAvatar.value = '';
+            saveContactList();
+        };
+
+        const removeContact = (id) => {
+            contactList.value = contactList.value.filter(c => c.id !== id);
+            saveContactList();
+        };
+
+        const saveContactList = async () => {
+            try {
+                await localforage.setItem('jingyu_contacts', JSON.parse(JSON.stringify(contactList.value)));
+            } catch(e) { console.warn('保存联系人失败', e); }
+        };
+
+        // 联系人列表深度监听，有变化自动保存
+        watch(contactList, saveContactList, { deep: true });
+
+        // 加载心情 + 联系人
+        (async () => {
+            try {
+                const md = await localforage.getItem('jingyu_mood');
+                if (md) {
+                    if (md.themCurrentMood) themCurrentMood.value = md.themCurrentMood;
+                    if (md.myCurrentMood) myCurrentMood.value = md.myCurrentMood;
+                    if (md.themMoodList) themMoodList.value = md.themMoodList;
+                }
+                const cl = await localforage.getItem('jingyu_contacts');
+                if (cl && Array.isArray(cl)) contactList.value = cl;
+            } catch(e) {}
+            // 启动心情轮换
+            if (themMoodList.value.length > 0 && !themCurrentMood.value) pickRandomMood();
+            scheduleMoodChange();
+        })();
 
         const settings = reactive({
             isDark: false, showAvatar: true, showNickname: false,
@@ -1359,7 +2623,9 @@ const draftLines = computed(() => draftText.value.split('\n').map(l => l.trim())
             avatarRadius: 50, bgImage: '', customCSS: ''
         });
 
-        const modals = reactive({ settings: false, replyManager: false, stickerPanel: false, multiDraft: false, groupEdit: false, githubGuide: false });
+const modals = reactive({ settings: false, replyManager: false, stickerPanel: false, multiDraft: false, groupEdit: false, githubGuide: false, letter: false, confirmDeleteLetter: false, moodManager: false });
+const pendingDeleteIdx = ref(null);
+        
         const groupEditTarget = ref(null);
         const openGroupEdit = (group) => {
             groupEditTarget.value = { id: group.id, name: group.name, tempName: group.name };
@@ -1423,28 +2689,65 @@ const draftLines = computed(() => draftText.value.split('\n').map(l => l.trim())
     const body = text.length > 60 ? text.slice(0, 60) + '…' : text;
     const title = '静语 · ' + name;
 
-    // 页面在前台 → 用应用内 toast
+    // 页面在前台 → 用应用内堆叠 toast
     if (document.visibilityState === 'visible') {
-        const toastEl = document.getElementById('inapp-toast');
-        const toastName = document.getElementById('toast-name');
-        const toastText = document.getElementById('toast-text');
-        if (toastEl && toastName && toastText) {
-            toastName.textContent = name;
-            toastText.textContent = body;
-            toastEl.style.display = 'flex';
-            clearTimeout(toastEl._timer);
-            toastEl._timer = setTimeout(() => { toastEl.style.display = 'none'; }, 3000);
-        }
+        const stack = document.getElementById('toast-stack');
+        if (!stack) return;
+        // 最多保留5条
+        while (stack.children.length >= 5) stack.removeChild(stack.firstChild);
+
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            background:var(--color-surface);
+            border:1px solid var(--color-border);
+            border-radius:14px;
+            padding:10px 18px;
+            min-width:200px;
+            max-width:80vw;
+            box-shadow:0 4px 20px rgba(0,0,0,0.12);
+            display:flex;
+            flex-direction:column;
+            gap:2px;
+            pointer-events:auto;
+            opacity:0;
+            transform:translateY(-8px) scale(0.96);
+            transition:opacity 0.25s ease,transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            cursor:pointer;
+        `;
+        toast.innerHTML = `
+            <div style="font-size:11px;letter-spacing:0.1em;color:var(--color-text);font-weight:500;">${name}</div>
+            <div style="font-size:12px;color:var(--color-muted);letter-spacing:0.05em;">${body}</div>
+        `;
+        stack.appendChild(toast);
+
+        // 进场动画
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        const dismiss = () => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-6px) scale(0.95)';
+            setTimeout(() => toast.remove(), 280);
+        };
+        toast.addEventListener('click', dismiss);
+        toast._timer = setTimeout(dismiss, 3500);
         return;
     }
 
-    // 页面在后台 → 通过 SW 发通知
+    // 页面在后台 → 优先通过 SW 发通知，SW 未就绪时直接发
     if (navigator.serviceWorker && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({
             type: 'SHOW_NOTIF',
             title: title,
             body: body
         });
+    } else {
+        // SW 首次安装尚未接管页面，直接用 Notification API
+        try { new Notification(title, { body, tag: 'jingyu-' + Date.now() }); } catch(e) {}
     }
 };
 
@@ -1482,10 +2785,43 @@ const draftLines = computed(() => draftText.value.split('\n').map(l => l.trim())
                     replyGroups: JSON.parse(JSON.stringify(replyGroups.value)),
                     stickerImages: JSON.parse(JSON.stringify(stickerImages.value))
                 });
+                refreshStorageInfo();
             }, 500);
         };
 
+        // ── 存储空间可视化 ──
+        const storageInfo = reactive({
+            totalKB: 0,
+            msgKB: 0,
+            repliesKB: 0,
+            stickersKB: 0,
+            settingsKB: 0,
+            limitKB: 50 * 1024 // 估算 50MB 软上限
+        });
+
+        const refreshStorageInfo = async () => {
+            try {
+                const data = await localforage.getItem('jingyu_data');
+                if (!data) return;
+                const full = JSON.stringify(data);
+                storageInfo.totalKB = Math.round(full.length * 2 / 1024); // UTF-16 ~2B/char
+
+                const msgStr = JSON.stringify(data.messages || []);
+                storageInfo.msgKB = Math.round(msgStr.length * 2 / 1024);
+
+                const repliesStr = JSON.stringify(data.replyGroups || []);
+                storageInfo.repliesKB = Math.round(repliesStr.length * 2 / 1024);
+
+                const stickersStr = JSON.stringify(data.stickerImages || []);
+                storageInfo.stickersKB = Math.round(stickersStr.length * 2 / 1024);
+
+                const settingsStr = JSON.stringify({ profiles: data.profiles, settings: data.settings });
+                storageInfo.settingsKB = Math.round(settingsStr.length * 2 / 1024);
+            } catch(e) {}
+        };
+
         watch([messages, profiles, settings, replyGroups], saveData, { deep: true });
+        watch([themCurrentMood, myCurrentMood, themMoodList], saveMoodData, { deep: true });
 
 const scrollToBottom = async () => {
     await nextTick();
@@ -1507,7 +2843,7 @@ const scrollToBottom = async () => {
             const q = quoteMsg.value ? { ...quoteMsg.value } : null;
             quoteMsg.value = null;
             messages.value.push({ id: msgId, sender, type, content: txt, timestamp: Date.now(), status: 'sent', quote: q });
-            playSound(sender);
+            playSound(sender === 'me' ? 'send' : 'them');
             scrollToBottom();
             if (sender === 'them') {
                 const displayText = type === 'image' ? '[图片]' : txt;
@@ -1534,20 +2870,19 @@ const scrollToBottom = async () => {
     const timerWorker = new Worker(URL.createObjectURL(new Blob([timerCode])));
     timerWorker.onmessage = () => {
         timerWorker.terminate();
-        isTyping.value = false;
 
         const all = replyGroups.value.flatMap(g => g.replies);
-        if (all.length === 0) { sendMsg('them', 'text', '......'); return; }
+        if (all.length === 0) {
+            isTyping.value = false;
+            sendMsg('them', 'text', '......');
+            return;
+        }
 
-        // 发送条数：1~4 之间完全随机
-        const count = Math.floor(Math.random() * 4) + 1;
-
-        // 随机概率：引用 10%~50%，表情包概率 10%~60%
-        const quoteChance = 0.1 + Math.random() * 0.4;
-        const emojiChance = 0.1 + Math.random() * 0.5;
-
+        // 发送条数：1~3 之间随机（4条太多了）
+        const count = Math.floor(Math.random() * 3) + 1;
+        // 纯随机引用
         const myMsgs = messages.value.filter(m => m.sender === 'me');
-        if (Math.random() < quoteChance && myMsgs.length > 0) {
+        if (Math.random() < Math.random() && myMsgs.length > 0) {
             const target = myMsgs[Math.floor(Math.random() * myMsgs.length)];
             quoteMsg.value = {
                 id: target.id, type: target.type,
@@ -1555,15 +2890,20 @@ const scrollToBottom = async () => {
             };
         }
 
-        // 分离文字和图片/表情回复池
         const textReplies = all.filter(r => !r.type || r.type === 'text');
         const imgReplies = all.filter(r => r.type === 'image');
+        const emojiChance = Math.random() * 0.5;
 
         for (let i = 0; i < count; i++) {
-            const msgDelay = i * (Math.random() * 1200 + 600);
+            const msgDelay = i * (Math.random() * 1000 + 500);
             setTimeout(() => {
-                if (i > 0) quoteMsg.value = null;
-                // 决定这条是否发表情包（仅当有图片回复时）
+                if (i > 0) {
+                    quoteMsg.value = null;
+                    isTyping.value = true; // 每条发完后短暂重新显示输入中
+                    setTimeout(() => { isTyping.value = false; }, 100);
+                } else {
+                    isTyping.value = false;
+                }
                 const useImg = imgReplies.length > 0 && Math.random() < emojiChance;
                 const pool = useImg ? imgReplies : (textReplies.length > 0 ? textReplies : all);
                 const pick = pool[Math.floor(Math.random() * pool.length)];
@@ -1575,14 +2915,42 @@ const scrollToBottom = async () => {
 };
         
         let bgWorker = null;
+        let bgSwInterval = null;
         const setupActiveMsg = () => {
+            // 清理旧的
             if (bgWorker) { bgWorker.terminate(); bgWorker = null; }
+            if (bgSwInterval) { clearInterval(bgSwInterval); bgSwInterval = null; }
+
             if (settings.activeMsg) {
                 const interval = (settings.activeInterval || 30) * 1000;
+
+                // Worker 计时（页面在前台时最可靠）
                 const workerCode = `let t=null;self.onmessage=e=>{if(e.data==='s'){clearInterval(t);t=setInterval(()=>self.postMessage('t'),${interval})}else if(e.data==='x')clearInterval(t)}`;
                 bgWorker = new Worker(URL.createObjectURL(new Blob([workerCode])));
                 bgWorker.onmessage = triggerAutoReply;
                 bgWorker.postMessage('s');
+
+                // 同时通过 SW 委托（页面在后台时的备援）
+                // 用 setInterval 形式：每隔 interval 重新向 SW 注册下一次
+                const scheduleSWTick = () => {
+                    if (!settings.activeMsg) return;
+                    const swCtl = navigator.serviceWorker && navigator.serviceWorker.controller;
+                    if (swCtl) {
+                        swCtl.postMessage({
+                            type: 'SCHEDULE',
+                            id: 'active_msg_tick',
+                            fireAt: Date.now() + interval,
+                            clientEvent: 'active_msg_tick'
+                        });
+                    }
+                };
+                scheduleSWTick();
+                // 每次 SW 触发后重新注册（在 jingyu-sw-fire 监听器里调用）
+                window._scheduleSWActiveTick = scheduleSWTick;
+            } else {
+                // 关闭时取消 SW 委托
+                const swCtl = navigator.serviceWorker && navigator.serviceWorker.controller;
+                if (swCtl) swCtl.postMessage({ type: 'UNSCHEDULE', id: 'active_msg_tick' });
             }
         };
 
@@ -1612,10 +2980,11 @@ const scrollToBottom = async () => {
             playSound('me');
             scrollToBottom();
             if (i === lines.length - 1) {
+                const batchIds = lines.map((_, j) => Date.now().toString() + '_' + j);
                 const readDelay = Math.random() * 1500 + 1200;
                 setTimeout(() => {
-                    messages.value.filter(m => m.sender === 'me' && m.status === 'sent')
-                        .forEach(m => m.status = 'read');
+                    const m = messages.value.find(x => x.id === msgId);
+                    if (m) m.status = 'read';
                     setTimeout(() => triggerAutoReply(), Math.random() * 1500 + 500);
                 }, readDelay);
             }
@@ -1631,18 +3000,51 @@ const scrollToBottom = async () => {
                 const img = new Image();
                 img.onload = () => {
                     const c = document.createElement('canvas');
-                    let w = img.width, h = img.height, MAX = 800;
-                    if(w>MAX) { h*=MAX/w; w=MAX; }
+                    let w = img.width, h = img.height, MAX = 1200;
+                    if(w>MAX) { h=Math.round(h*MAX/w); w=MAX; }
+                    if(h>MAX) { w=Math.round(w*MAX/h); h=MAX; }
                     c.width=w; c.height=h;
                     c.getContext('2d').drawImage(img,0,0,w,h);
-                    sendMsg('me', 'image', c.toDataURL('image/jpeg', 0.8));
+                    sendMsg('me', 'image', c.toDataURL('image/jpeg', 0.75));
                 };
                 img.src = ev.target.result;
             };
             reader.readAsDataURL(file); e.target.value = '';
         };
 
-        const deleteMsg = id => messages.value = messages.value.filter(m => m.id !== id);
+        const withdrawHints = [
+    '墨已散，言已隐',
+    '此句化烟，不曾落笔',
+    '覆水难收，唯余空白',
+    '笔墨收回，恍若未书',
+    '风过无痕，字隐无踪',
+    '落笔未干，已随风去',
+    '此言如烟，散入山岚',
+];
+
+const deleteMsg = (id) => {
+    selectedMsgId.value = null;
+    const el = document.getElementById('msg-' + id);
+    if (el) {
+        const bubble = el.querySelector('.msg-bubble');
+        const wrapper = el.querySelector('.flex.group');
+        if (bubble) bubble.classList.add('msg-withdraw');
+
+        // 插入古风提示语
+        const hint = document.createElement('div');
+        hint.className = 'withdraw-hint';
+        hint.textContent = withdrawHints[Math.floor(Math.random() * withdrawHints.length)];
+        if (wrapper) wrapper.after(hint);
+
+        // 动画结束后移除
+        setTimeout(() => {
+            messages.value = messages.value.filter(m => m.id !== id);
+            hint.remove();
+        }, 2200);
+    } else {
+        messages.value = messages.value.filter(m => m.id !== id);
+    }
+};
 
         // ── 引用功能 ──
         const quoteMsg = ref(null);
@@ -1657,8 +3059,13 @@ const scrollToBottom = async () => {
             };
         };
 
+        const didLongPress = ref(false);
         const onTouchStart = (msg) => {
-            touchTimer = setTimeout(() => setQuote(msg), 500);
+            didLongPress.value = false;
+            touchTimer = setTimeout(() => {
+                didLongPress.value = true;
+                setQuote(msg);
+            }, 500);
         };
         const onTouchEnd = () => {
             clearTimeout(touchTimer);
@@ -1799,10 +3206,19 @@ const bgPreview = ref('');
         };
         
         const exportAllData = async () => {
-    const data = await localforage.getItem('jingyu_data');
+    const data            = await localforage.getItem('jingyu_data');
+    const pendingLetters  = await localforage.getItem('jingyu_pending_letters');
+    const letterHistory   = await localforage.getItem('jingyu_letter_history');
+    const github          = await localforage.getItem('jingyu_github');
     if (!data) { alert('没有数据可导出'); return; }
+    const bundle = {
+        jingyu_data: data,
+        jingyu_pending_letters: pendingLetters || [],
+        jingyu_letter_history:  letterHistory  || [],
+        jingyu_github:          github         || {}
+    };
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' }));
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(bundle)], { type: 'application/json' }));
     a.download = `此刻，我们正相爱_${Date.now()}.json`;
     a.click();
 };
@@ -1813,12 +3229,18 @@ const importAllData = (e) => {
     const r = new FileReader();
     r.onload = async (ev) => {
         try {
-            const data = JSON.parse(ev.target.result);
+            const bundle = JSON.parse(ev.target.result);
+
+            // 兼容旧格式（直接是 jingyu_data 的内容）
+            const data = bundle.jingyu_data || bundle;
+
             if (!data.messages && !data.profiles && !data.settings && !data.replyGroups) {
                 alert('❌ 不是有效的静语备份文件'); return;
             }
-            if (data.messages) messages.value = data.messages;
-            if (data.profiles) Object.assign(profiles, data.profiles);
+
+            // 恢复主数据
+            if (data.messages)    messages.value = data.messages;
+            if (data.profiles)    Object.assign(profiles, data.profiles);
             if (data.settings) {
                 Object.assign(settings, data.settings);
                 if (settings.isDark) document.documentElement.classList.add('dark');
@@ -1827,6 +3249,25 @@ const importAllData = (e) => {
             }
             if (data.replyGroups) replyGroups.value = data.replyGroups;
             await localforage.setItem('jingyu_data', data);
+
+            // 恢复信件
+            if (bundle.jingyu_pending_letters) {
+                pendingLetters.value = bundle.jingyu_pending_letters;
+                await localforage.setItem('jingyu_pending_letters', bundle.jingyu_pending_letters);
+                pendingLetters.value.forEach(p => scheduleLetterDelivery(p));
+                updateLetterRemainText();
+            }
+            if (bundle.jingyu_letter_history) {
+                letterHistory.value = bundle.jingyu_letter_history;
+                await localforage.setItem('jingyu_letter_history', bundle.jingyu_letter_history);
+            }
+
+            // 恢复 GitHub 设置
+            if (bundle.jingyu_github && Object.keys(bundle.jingyu_github).length) {
+                Object.assign(githubSettings, bundle.jingyu_github);
+                await localforage.setItem('jingyu_github', bundle.jingyu_github);
+            }
+
             alert('✅ 导入成功！');
         } catch (err) { alert('❌ 导入失败：' + err.message); }
     };
@@ -1883,33 +3324,19 @@ const importAllData = (e) => {
 
         // ── 去重 ──
         const dedupReplies = () => {
-    const g = currentGroup.value;
-    // 先收集其他分组的所有内容作为参照
-    const otherKeys = new Set();
-    replyGroups.value.forEach(group => {
-        if (group.id === currentGroupId.value) return;
-        group.replies.forEach(r => {
-            otherKeys.add(r.type === 'image' ? r.img : r.text);
-        });
-    });
-
-    const selfSeen = new Set();
-    const before = g.replies.length;
-
-    g.replies = g.replies.filter(r => {
-        const key = r.type === 'image' ? r.img : r.text;
-        // 组内重复
-        if (selfSeen.has(key)) return false;
-        selfSeen.add(key);
-        // 跟其他组重复
-        if (otherKeys.has(key)) return false;
-        return true;
-    });
-
-    const removed = before - g.replies.length;
-    saveData();
-    alert(`✅ 去重完成！移除了 ${removed} 条重复`);
-};
+            const g = currentGroup.value;
+            const seen = new Set();
+            const before = g.replies.length;
+            g.replies = g.replies.filter(r => {
+                const key = r.type === 'image' ? r.img : r.text;
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+            const removed = before - g.replies.length;
+            saveData();
+            alert(`✅ 去重完成！移除了 ${removed} 条重复`);
+        };
         // ── 编辑字卡 ──
         const editingReply = ref(null);
         const startEditReply = (reply) => {
@@ -1932,10 +3359,12 @@ const importAllData = (e) => {
                 r.onload = ev => {
                     const img = new Image();
                     img.onload = () => {
-                        const c = document.createElement('canvas'), w = img.width, h = img.height, MAX = 400;
-                        const ratio = w/h; c.width=w>h?MAX:MAX*ratio; c.height=w>h?MAX/ratio:MAX;
+                        const c = document.createElement('canvas'), w = img.width, h = img.height, MAX = 160;
+                        const ratio = w/h;
+                        c.width = w > h ? MAX : Math.round(MAX * ratio);
+                        c.height = w > h ? Math.round(MAX / ratio) : MAX;
                         c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-                        currentGroup.value.replies.push({ type:'image', img: c.toDataURL('image/jpeg', 0.85), text:'' });
+                        currentGroup.value.replies.push({ type:'image', img: c.toDataURL('image/jpeg', 0.55), text:'' });
                     }; img.src = ev.target.result;
                 }; r.readAsDataURL(file);
             }
@@ -1948,10 +3377,12 @@ const importAllData = (e) => {
                 r.onload = ev => {
                     const img = new Image();
                     img.onload = () => {
-                        const c = document.createElement('canvas'), w = img.width, h = img.height, MAX = 400;
-                        const ratio = w/h; c.width=w>h?MAX:MAX*ratio; c.height=w>h?MAX/ratio:MAX;
+                        const c = document.createElement('canvas'), w = img.width, h = img.height, MAX = 160;
+                        const ratio = w/h;
+                        c.width = w > h ? MAX : Math.round(MAX * ratio);
+                        c.height = w > h ? Math.round(MAX / ratio) : MAX;
                         c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-                        stickerImages.value.push(c.toDataURL('image/jpeg', 0.85));
+                        stickerImages.value.push(c.toDataURL('image/jpeg', 0.55));
                         saveData();
                     }; img.src = ev.target.result;
                 }; r.readAsDataURL(file);
@@ -2097,8 +3528,18 @@ const importAllData = (e) => {
                 }
             } catch(e) {}
             if(settings.isDark) document.documentElement.classList.add('dark');
-            applyCSS(); applyBg(); setupActiveMsg(); checkNotifPermission();
+            applyCSS(); applyBg(); setupActiveMsg(); checkNotifPermission(); refreshStorageInfo();
+            
+           // 恢复待送达信件的定时器
+pendingLetters.value.forEach(p => scheduleLetterDelivery(p));
+updateLetterRemainText();
+
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') nextTick(lucide.createIcons); });
+            // 监听保活唤醒事件，重启后台定时器
+            window.addEventListener('jingyu-wakeup', () => {
+                setupActiveMsg();
+                scheduleMoodChange();
+            });
             const ta = document.querySelector('textarea');
             if(ta) ta.addEventListener('input', function(){ this.style.height='auto'; this.style.height=this.scrollHeight+'px'; });
             setTimeout(() => {
@@ -2107,6 +3548,13 @@ const importAllData = (e) => {
                 nextTick(() => { scrollToBottom(); if(window.formkit && chatList.value) formkit.autoAnimate(chatList.value, {duration: 300}); });
             }, 4800);
             lucide.createIcons();
+
+            // 注册 Service Worker（后台通知必须）
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(err => {
+                    console.warn('SW 注册失败:', err);
+                });
+            }
         });
 
         watch([messages, modals], () => nextTick(() => lucide.createIcons()), { deep: true });
@@ -2115,7 +3563,8 @@ const importAllData = (e) => {
             chatList, messages, inputText, isTyping, previewImg, notifGranted,
             bgPreview,
             profiles, settings, modals, replyGroups, currentGroupId, searchQuery, newReplyText, filteredReplies,
-            sendMsg, triggerReply, handleImageUpload, deleteMsg, quoteMsg, setQuote, onTouchStart, onTouchEnd, scrollToMsg, selectedMsgId, draftText, draftLines, sendDraft,
+            sendMsg, triggerReply, handleImageUpload, deleteMsg, quoteMsg, setQuote, onTouchStart, onTouchEnd, scrollToMsg, didLongPress, selectedMsgId, draftText, draftLines, sendDraft,
+letterText, letterTab, letterHistory, pendingLetters, sendLetter, showLetterToast, deleteLetter, confirmDeleteLetter, cancelDeleteLetter, pendingDeleteIdx,
             shouldShowDate, formatDateSeparator, formatTime, shouldShowAvatar,
             toggleTheme, applyCSS, applyBg, editProfile, changeAvatar, changeName, uploadBg, pickBgImage, confirmBg, clearBgImage, clearChat, exportChat, exportAllData, importAllData,
             addGroup, deleteGroup, addReply, removeReply, exportReplies, importReplies, saveData,
@@ -2125,7 +3574,14 @@ const importAllData = (e) => {
             dedupReplies, editingReply, startEditReply, confirmEditReply, saveEditReply,
             addImageReplies, requestNotifPermission, popRandomEmoji,
             stickerImages, addStickers, sendSticker, deleteSticker,
-            stickerImages, addStickers, sendSticker, deleteSticker
+            storageInfo, refreshStorageInfo,
+            // 心情
+            moodVisible, themCurrentMood, myCurrentMood, themMoodList, myMoodEditing, myMoodDraft, myMoodInput,
+            newMoodText, addMood,
+            startEditMyMood, saveMyMood, pickRandomMood, saveMoodData,
+            // 联系人
+            contactList, modals_contactPanel, newContactName, newContactMyName, newContactAvatar,
+            switchContact, addContact, removeContact, saveContactList, pickContactAvatar, pickNewContactAvatar
         };
     }
 }).mount('#app');
@@ -2153,6 +3609,11 @@ const importAllData = (e) => {
         '仆本恨人，卿须怜我',
         '若是前世未有缘，待重结、来生愿',
         '瘦影自临春水照，卿须怜我我怜卿',
+        '不辞青山，相随与共',
+        '情不知所起，一往而深',
+        '知我意，感君怜，此情须问天',
+        '观我旧往，同我仰春。知我晦暗，许我春朝',
+        '懒烧金，慵篆玉，流水桃花空断续',
     ];
     const poemEl = document.getElementById('sp-poem');
     if(poemEl) poemEl.textContent = poems[Math.floor(Math.random() * poems.length)];
@@ -2175,7 +3636,7 @@ const importAllData = (e) => {
     // ── 汉字雨 ──
     const rainBox = document.getElementById('char-rain');
     if(rainBox) {
-        const chars = '静语传心思念归期入梦相见月光信笺温柔细雪落花时节清风明月山河故人天涯咫尺灯火阑珊';
+        const chars = '静语传心思念归期入梦相见月光信笺温柔细雪落花时节清风明月山河故人天涯咫尺灯火阑珊昭昭云端月此意寄昭昭';
         for(let i = 0; i < 18; i++) {
             const col = document.createElement('div');
             col.className = 'sp-rain-col';
